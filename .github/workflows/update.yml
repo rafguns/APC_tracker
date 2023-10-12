@@ -1,0 +1,42 @@
+name: Scrape latest data
+
+on:
+  push:
+  workflow_dispatch:
+  schedule:
+    - cron:  '21 11 * * *'
+
+jobs:
+  scheduled:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Check out this repo
+      uses: actions/checkout@v3
+      with:
+        fetch-depth: 0
+    - name: Set up Python
+      uses: actions/setup-python@v4.3.0
+      with:
+        python-version: 3.11
+    - name: Install Python dependencies
+      run: |-
+        # Install script dependencies
+        python3 -m pip install pandas requests openpyxl
+        # Install csv-diff with https://github.com/simonw/csv-diff/pull/19
+        python3 -m pip install git+https://github.com/mikecoop83/csv-diff@c3d32f758343a2ba3737d612e6e906fd9d77322b
+    - name: Fetch latest data
+      run: |-
+        # -f ensures that this won't fail if the file doesn't exist
+        rm -f article-publishing-charge.xlsx
+        cp article-publishing-charge.csv article-publishing-charge-old.csv
+        python APC_tracker.py
+        # Generate commit message using csv-diff
+        csv-diff article-publishing-charge-old.csv article-publishing-charge.csv --key "ISSN" --encoding "utf-8" --singular=journal --plural=journals > message.txt
+    - name: Commit and push if it changed
+      run: |-
+        git config user.name "Automated"
+        git config user.email "actions@users.noreply.github.com"
+        git add article-publishing-charge.csv
+        timestamp=$(date -u)
+        git commit -F message.txt || exit 0
+        git push
