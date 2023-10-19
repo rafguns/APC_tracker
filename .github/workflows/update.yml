@@ -19,8 +19,11 @@ jobs:
       with:
         python-version: 3.11
     - name: Install Python dependencies
-      # Install csv-diff with https://github.com/simonw/csv-diff/pull/19
-      run: python3 -m pip install git+https://github.com/mikecoop83/csv-diff@c3d32f758343a2ba3737d612e6e906fd9d77322b
+      run: |-
+        # Install script dependencies
+        python3 -m pip install pandas requests openpyxl
+        # Install csv-diff with https://github.com/simonw/csv-diff/pull/19
+        python3 -m pip install git+https://github.com/mikecoop83/csv-diff@c3d32f758343a2ba3737d612e6e906fd9d77322b
     - name: Fetch latest data
       run: |-
         # -f ensures that this won't fail if the file doesn't exist
