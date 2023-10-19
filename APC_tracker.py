@@ -50,4 +50,4 @@ if __name__ == "__main__":
         names=['ISSN', 'Title', 'Business Model', 'USD']
     )
     df = df.dropna(subset="Title")
-    df.to_csv("article-publishing-charge.csv")
+    df.to_csv("article-publishing-charge.csv", index=False)
